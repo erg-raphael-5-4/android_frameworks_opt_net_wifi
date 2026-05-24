@@ -222,6 +222,18 @@ public class Utils {
             return securityTypes.get(0);
         }
         if (securityTypes.size() == 2) {
+            // Transition-mode pair: prefer the stronger of the two so the
+            // Settings UI saves the network with the modern AKM. The previous
+            // behaviour preferred PSK/OPEN, which silently downgraded any
+            // WPA3-capable client on a WPA2/WPA3 mixed AP and any OWE-capable
+            // client on an OWE transition network. With the downgrade, mixed
+            // APs that mandate SAE/OWE rejected association ("invalid PMKID").
+            if (securityTypes.contains(WifiInfo.SECURITY_TYPE_SAE)) {
+                return WifiInfo.SECURITY_TYPE_SAE;
+            }
+            if (securityTypes.contains(WifiInfo.SECURITY_TYPE_OWE)) {
+                return WifiInfo.SECURITY_TYPE_OWE;
+            }
             if (securityTypes.contains(WifiInfo.SECURITY_TYPE_OPEN)) {
                 return WifiInfo.SECURITY_TYPE_OPEN;
             }
